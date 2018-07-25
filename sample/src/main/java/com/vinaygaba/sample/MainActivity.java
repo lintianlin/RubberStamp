@@ -141,6 +141,9 @@ public class MainActivity extends AppCompatActivity {
         gradientDrawable.setColor(mTextBackgroundColorValue);
     }
 
+    /**
+     * 生成水印
+     */
     public void generateRubberStamp() {
         RubberStampConfig config;
         int alpha = mAlphaSeekBar.getProgress();

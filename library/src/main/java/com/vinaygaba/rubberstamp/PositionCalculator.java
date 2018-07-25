@@ -20,20 +20,19 @@ import android.util.Pair;
 public class PositionCalculator {
 
     /**
-     * Utility method to calculate the coordinates of the rubberstamp based on the params passed to
-     * it.
-     * @param location The RubberStampPosition which denotes the position of the watermark
-     * @param bitmapWidth The width of the bitmap where the rubberstamp will be drawn
-     * @param bitmapHeight The height of the bitmap where the rubberstamp will be drawn
-     * @param rubberstampWidth The width of the rubberstamp
-     * @param rubberstampHeight The height of the rubberstamp
-     * @return Returns a Pair object which has the x-coordinate and the y-coordinate
+     * 通过传入的参数计算水印坐标的公共方法
+     * @param location    位置设置参数
+     * @param bitmapWidth  图片宽度
+     * @param bitmapHeight  图片高度
+     * @param rubberstampWidth  水印宽度
+     * @param rubberstampHeight  水印高度
+     * @return
      */
     public static Pair<Integer, Integer> getCoordinates(RubberStampPosition location,
                                                         int bitmapWidth, int bitmapHeight,
                                                         int rubberstampWidth, int rubberstampHeight) {
         switch(location){
-            case TOP_LEFT:
+            case TOP_LEFT://左上方
                 return new Pair<>(0, rubberstampHeight);
 
             case TOP_CENTER:

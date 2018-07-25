@@ -39,43 +39,55 @@ public class RubberStamp {
 
     private Context mContext;
     private static final int BACKGROUND_MARGIN = 10;
-    
-    public RubberStamp(@NonNull Context context){
+
+    public RubberStamp(@NonNull Context context) {
         mContext = context;
     }
 
+    /**
+     * 添加水印
+     *
+     * @param config
+     * @return
+     */
     public Bitmap addStamp(@NonNull RubberStampConfig config) {
         if (config == null) {
             throw new IllegalArgumentException("The config passed to this method should never" +
                     "be null");
         }
+        //获取需要添加水印的原始图片
         Bitmap baseBitmap = getBaseBitmap(config);
         if (baseBitmap == null) {
             return baseBitmap;
         }
-
+        //获取原始图片的宽度和高度
         int baseBitmapWidth = baseBitmap.getWidth();
         int baseBitmapHeight = baseBitmap.getHeight();
-      
+
+        //通过原始图片创建一个副本图片
         Bitmap result = Bitmap.createBitmap(baseBitmapWidth, baseBitmapHeight, baseBitmap.getConfig());
+        //创建画布
         Canvas canvas = new Canvas(result);
+        //将副本图片画到画布上
         canvas.drawBitmap(baseBitmap, 0, 0, null);
 
-        // Either one of the methods(text/bitmap) can be used to add a rubberstamp
+        //判断需要添加文字水印还是图片水印
         if (!TextUtils.isEmpty(config.getRubberStampString())) {
+            //添加文字水印的方法
             addTextToBitmap(config, canvas, baseBitmapWidth, baseBitmapHeight);
         } else if (config.getRubberStampBitmap() != null) {
+            //添加图片水印的方法
             addBitmapToBitmap(config.getRubberStampBitmap(), config, canvas,
                     baseBitmapWidth, baseBitmapHeight);
         }
         return result;
     }
-  
+
     @Nullable
     private Bitmap getBaseBitmap(@NonNull RubberStampConfig config) {
         Bitmap baseBitmap = config.getBaseBitmap();
         @DrawableRes int drawable = config.getBaseDrawable();
-      
+
         if (baseBitmap == null) {
             baseBitmap = BitmapFactory.decodeResource(mContext.getResources(), drawable);
             if (baseBitmap == null) return null;
@@ -84,56 +96,66 @@ public class RubberStamp {
     }
 
     /**
-     * Method to add text RubberStamp to a canvas based on the provided configuration
-     * @param config The RubberStampConfig that specifies how the RubberStamp should look
-     * @param canvas The canvas on top of which the RubberStamp needs to be drawn
-     * @param baseBitmapWidth The width of the base bitmap
-     * @param baseBitmapHeight The height of the base bitmap
+     * 添加文字水印到图片上
+     *
+     * @param config
+     * @param canvas
+     * @param baseBitmapWidth
+     * @param baseBitmapHeight
      */
     private void addTextToBitmap(@NonNull RubberStampConfig config,
                                  @NonNull Canvas canvas,
                                  int baseBitmapWidth,
                                  int baseBitmapHeight) {
+        //创建一个书写文字的矩形区域
         Rect bounds = new Rect();
 
+        //创建一个画笔
         Paint paint = new Paint();
+        //设置抗锯齿
         paint.setAntiAlias(true);
+        //设置下划线不显示
         paint.setUnderlineText(false);
-
+        //设置文字大小
         paint.setTextSize(config.getTextSize());
-
+        //获取字体路径
         String typeFacePath = config.getTypeFacePath();
-        // Add font typeface if its present in the config.
-        if(!TextUtils.isEmpty(typeFacePath)) {
+        // 如果字体路径不为空，则设置字体路径
+        if (!TextUtils.isEmpty(typeFacePath)) {
             Typeface typeface = Typeface.createFromAsset(mContext.getAssets(), typeFacePath);
             paint.setTypeface(typeface);
         }
-
+        //获取文字着色器
         Shader shader = config.getTextShader();
-        // Add shader if its present in the config.
+        //如果文字颜色不为空，则设置文字颜色
         if (shader != null) {
             paint.setShader(shader);
         }
 
+        //设置文字阴影
         if (config.getTextShadowXOffset() != 0 || config.getTextShadowYOffset() != 0
-        || config.getTextShadowBlurRadius() != 0) {
-            // If any shadow property is present, set a shadow layer.
+                || config.getTextShadowBlurRadius() != 0) {
+            //如果阴影设置不为空，则设置文字阴影
             paint.setShadowLayer(config.getTextShadowBlurRadius(),
                     config.getTextShadowXOffset(),
                     config.getTextShadowYOffset(),
                     config.getTextShadowColor());
         }
-
+        //获取水印文字
         String rubberStampString = config.getRubberStampString();
-        paint.getTextBounds(rubberStampString,0,rubberStampString.length(),bounds);
-
+        //将文字写到创建的矩形区域中
+        paint.getTextBounds(rubberStampString, 0, rubberStampString.length(), bounds);
+        //获取矩形区域的宽度
         int rubberStampWidth = bounds.width();
+        //测量文字的宽度
         float rubberStampMeasuredWidth = paint.measureText(rubberStampString);
+        //获取矩形区域的高度
         int rubberStampHeight = bounds.height();
-
+        //获取设置的X轴位置
         int positionX = config.getPositionX();
+        //获取设置的Y轴位置
         int positionY = config.getPositionY();
-
+        //如果水印位置不是设置的自定义
         if (config.getRubberStampPosition() != CUSTOM) {
             // If the specified RubberStampPosition is not CUSTOM, use calculates its x & y
             // co-ordinates.
@@ -145,26 +167,27 @@ public class RubberStamp {
             positionY = pair.second;
         }
 
-        // Add the margin to this position if it was passed to the config.
+        //设置margin值
         positionX += config.getXMargin();
         positionY += config.getYMargin();
 
+        //获取旋转角度度
         float rotation = config.getRotation();
-        // Add rotation if its present in the config.
+        //如果旋转角度存在则设置水印的旋转角度
         if (rotation != 0.0f) {
             canvas.rotate(rotation, positionX + bounds.exactCenterX(),
                     positionY - bounds.exactCenterY());
         }
 
-        // Add the specified text color if its present in the config or it will use the default value.
+        //设置文字颜色
         paint.setColor(config.getTextColor());
-
+        //获取透明度
         int alpha = config.getAplha();
-        // Add alpha to the rubberstamp if its within range or it uses the default value.
+        //如果透明度设置存在，则设置水印的透明度
         if (alpha >= 0 && alpha <= 255) {
             paint.setAlpha(alpha);
         }
-
+        //如果设置的不是全屏模式
         if (config.getRubberStampPosition() != TILE) {
             // The textBackgroundColor is only used if the specified RubberStampPosition is not TILE
             // This is because the background is actually a rectangle whose bounds are calcualted
@@ -174,17 +197,19 @@ public class RubberStamp {
             if (backgroundColor != 0) {
                 Paint backgroundPaint = new Paint();
                 backgroundPaint.setColor(backgroundColor);
+                //将矩形画到画布上
                 canvas.drawRect(positionX - BACKGROUND_MARGIN,
                         positionY - bounds.height() - paint.getFontMetrics().descent - BACKGROUND_MARGIN,
                         (positionX + rubberStampMeasuredWidth + config.getTextShadowXOffset() + BACKGROUND_MARGIN),
                         positionY + config.getTextShadowYOffset() + paint.getFontMetrics().descent + BACKGROUND_MARGIN,
                         backgroundPaint);
             }
-            canvas.drawText(rubberStampString, positionX , positionY, paint);
-        } else {
+            //将文字画到画布上
+            canvas.drawText(rubberStampString, positionX, positionY, paint);
+        } else {//全屏模式
             // If the specified RubberStampPosition is TILE, it tiles the rubberstamp across
             // the bitmap. In order to generate a tiled bitamp, it uses a bitmap shader.
-            Bitmap textImage = Bitmap.createBitmap((int)rubberStampMeasuredWidth,
+            Bitmap textImage = Bitmap.createBitmap((int) rubberStampMeasuredWidth,
                     rubberStampHeight,
                     Bitmap.Config.ARGB_8888);
             Canvas textCanvas = new Canvas(textImage);
@@ -194,16 +219,17 @@ public class RubberStamp {
                     Shader.TileMode.REPEAT));
             Rect bitmapShaderRect = canvas.getClipBounds();
             canvas.drawRect(bitmapShaderRect, paint);
-        }    
+        }
     }
 
     /**
      * Method to add a bitmap RubberStamp to a canvas based on the provided configuration
+     *
      * @param rubberStampBitmap The bitmap which will be used as the RubberStamp
-     * @param config The RubberStampConfig that specifies how the RubberStamp should look
-     * @param canvas The canvas on top of which the RubberStamp needs to be drawn
-     * @param baseBitmapWidth The width of the base bitmap
-     * @param baseBitmapHeight The height of the base bitmap
+     * @param config            The RubberStampConfig that specifies how the RubberStamp should look
+     * @param canvas            The canvas on top of which the RubberStamp needs to be drawn
+     * @param baseBitmapWidth   The width of the base bitmap
+     * @param baseBitmapHeight  The height of the base bitmap
      */
     private void addBitmapToBitmap(@NonNull Bitmap rubberStampBitmap,
                                    @NonNull RubberStampConfig config,
@@ -246,7 +272,7 @@ public class RubberStamp {
         }
 
         if (rubberStampPosition != TILE) {
-            canvas.drawBitmap(rubberStampBitmap, positionX, positionY , paint);
+            canvas.drawBitmap(rubberStampBitmap, positionX, positionY, paint);
         } else {
             // If the specified RubberStampPosition is TILE, it tiles the rubberstamp across
             // the bitmap. In order to generate a tiled bitamp, it uses a bitmap shader.

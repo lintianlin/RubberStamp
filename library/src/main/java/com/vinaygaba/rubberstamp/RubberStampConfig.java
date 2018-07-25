@@ -27,19 +27,19 @@ public class RubberStampConfig {
 
     private Bitmap mBaseBitmap;
     @DrawableRes private int mBaseDrawable;
-    private int mTextSize;
-    @ColorInt private int mTextColor;
-    @ColorInt private int mTextBackgroundColor;
-    private String mTypeFacePath;
-    private RubberStampPosition mRubberStampPosition;
-    private String mRubberStampString;
-    private Bitmap mRubberStampBitmap;
-    private int mAplha;
-    private Shader mTextShader;
-    private float mRotation;
-    private int mPositionX, mPositionY;
-    private float mTextShadowBlurRadius, mTextShadowXOffset, mTextShadowYOffset;
-    private int mTextShadowColor;
+    private int mTextSize;//文字大小
+    @ColorInt private int mTextColor;//文字颜色
+    @ColorInt private int mTextBackgroundColor;//文字背景图片
+    private String mTypeFacePath;//文字字体路径
+    private RubberStampPosition mRubberStampPosition;//水印显示位置
+    private String mRubberStampString;//文字水印内容
+    private Bitmap mRubberStampBitmap;//图片水印位置
+    private int mAplha;//透明度
+    private Shader mTextShader;//着色器（设置颜色）
+    private float mRotation;//旋转角度
+    private int mPositionX, mPositionY;//水印显示位置
+    private float mTextShadowBlurRadius, mTextShadowXOffset, mTextShadowYOffset;//阴影设置参数
+    private int mTextShadowColor;//阴影颜色
     private int mXMargin, mYMargin;
 
     private RubberStampConfig(RubberStampConfigBuilder builder) {
