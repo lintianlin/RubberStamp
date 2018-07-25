@@ -1,5 +1,6 @@
 package com.vinaygaba.sample;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -32,6 +33,11 @@ import com.vinaygaba.rubberstamp.RubberStamp;
 import com.vinaygaba.rubberstamp.RubberStampConfig;
 import com.vinaygaba.rubberstamp.RubberStampPosition;
 
+import java.util.ArrayList;
+
+import me.iwf.photopicker.PhotoPagerActivity;
+import me.iwf.photopicker.PhotoPickerActivity;
+import me.iwf.photopicker.utils.PhotoPickerIntent;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -41,6 +47,7 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "Sample";
+    private static final int REQUEST_CODE = 1;
     private ImageView mImageView;
     private RadioGroup mRadioGroup;
     private Bitmap mBaseBitmap;
@@ -52,9 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private EditText mRubberStampText;
     private ColorPicker mColorPicker;
     private RubberStamp mRubberStamp;
-    @ColorInt private int mTextColorValue = Color.RED;
-    @ColorInt private int mTextBackgroundColorValue = Color.TRANSPARENT;
+    @ColorInt
+    private int mTextColorValue = Color.RED;
+    @ColorInt
+    private int mTextBackgroundColorValue = Color.TRANSPARENT;
     private Switch mShaderSwitch;
+    private Button selectPic;
+    private ArrayList<String> photos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         mBaseBitmap = BitmapFactory.decodeResource(getResources(),
                 R.drawable.lenna);
         mGenerateButton = (Button) findViewById(R.id.generateRubberStamp);
+        selectPic = (Button) findViewById(R.id.selectPic);
         mAlphaSeekBar = (SeekBar) findViewById(R.id.alphaSeekBar);
         mRotationSeekBar = (SeekBar) findViewById(R.id.rotationSeekBar);
         mTextSizeSeekBar = (SeekBar) findViewById(R.id.textSizeSeekBar);
@@ -83,13 +95,14 @@ public class MainActivity extends AppCompatActivity {
         mShaderSwitch = (Switch) findViewById(R.id.shaderSwitch);
         mColorPicker = new ColorPicker(this, 255, 0, 0);
         mRubberStamp = new RubberStamp(this);
+
     }
 
     public void setListeners() {
         mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.textRubberStamp) {
+                if (checkedId == R.id.textRubberStamp) {
                     mTextLayoutWrapper.setVisibility(View.VISIBLE);
                 } else {
                     mTextLayoutWrapper.setVisibility(View.GONE);
@@ -133,6 +146,26 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        selectPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PhotoPickerIntent intent = new PhotoPickerIntent(MainActivity.this);
+                intent.setPhotoCount(1);
+                intent.setShowCamera(true);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, PhotoPagerActivity.class);
+                intent.putExtra(PhotoPagerActivity.EXTRA_CURRENT_ITEM, 0);
+                intent.putExtra(PhotoPagerActivity.EXTRA_PHOTOS, photos);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+
     }
 
     public void setDefaults() {
@@ -157,12 +190,12 @@ public class MainActivity extends AppCompatActivity {
                 .rotation(rotation)
                 .rubberStampPosition(rubberStampPosition);
 
-        if(mRadioGroup.getCheckedRadioButtonId() == R.id.bitmapRubberStamp) {
+        if (mRadioGroup.getCheckedRadioButtonId() == R.id.bitmapRubberStamp) {
             Bitmap logo = BitmapFactory.decodeResource(getResources(),
                     R.drawable.logo);
             config = builder
-                        .rubberStamp(logo)
-                        .build();
+                    .rubberStamp(logo)
+                    .build();
         } else {
             String path = convertFontPositionToPath(mTextFonts.getSelectedItemPosition());
             Shader shader = getShader();
@@ -196,39 +229,55 @@ public class MainActivity extends AppCompatActivity {
 
     private RubberStampPosition convertToRubberStampPosition(int selectedItemPosition) {
         switch (selectedItemPosition) {
-            case 0: return RubberStampPosition.TOP_LEFT;
+            case 0:
+                return RubberStampPosition.TOP_LEFT;
 
-            case 1: return RubberStampPosition.TOP_CENTER;
+            case 1:
+                return RubberStampPosition.TOP_CENTER;
 
-            case 2: return RubberStampPosition.TOP_RIGHT;
+            case 2:
+                return RubberStampPosition.TOP_RIGHT;
 
-            case 3: return RubberStampPosition.CENTER_LEFT;
+            case 3:
+                return RubberStampPosition.CENTER_LEFT;
 
-            case 4: return RubberStampPosition.CENTER;
+            case 4:
+                return RubberStampPosition.CENTER;
 
-            case 5: return RubberStampPosition.CENTER_RIGHT;
+            case 5:
+                return RubberStampPosition.CENTER_RIGHT;
 
-            case 6: return RubberStampPosition.BOTTOM_LEFT;
+            case 6:
+                return RubberStampPosition.BOTTOM_LEFT;
 
-            case 7: return RubberStampPosition.BOTTOM_CENTER;
+            case 7:
+                return RubberStampPosition.BOTTOM_CENTER;
 
-            case 8: return RubberStampPosition.BOTTOM_RIGHT;
+            case 8:
+                return RubberStampPosition.BOTTOM_RIGHT;
 
-            case 9: return RubberStampPosition.CUSTOM;
+            case 9:
+                return RubberStampPosition.CUSTOM;
 
-            case 10: return RubberStampPosition.TILE;
+            case 10:
+                return RubberStampPosition.TILE;
 
-            default: return RubberStampPosition.CENTER;
+            default:
+                return RubberStampPosition.CENTER;
         }
     }
 
     public String convertFontPositionToPath(int position) {
         String basePath = "fonts/";
         switch (position) {
-            case 0: return basePath + "bebasneue.otf";
-            case 1: return basePath + "caviardreams.ttf";
-            case 2: return basePath + "champagne.ttf";
-            default: return basePath + "bebasneue.otf";
+            case 0:
+                return basePath + "bebasneue.otf";
+            case 1:
+                return basePath + "caviardreams.ttf";
+            case 2:
+                return basePath + "champagne.ttf";
+            default:
+                return basePath + "bebasneue.otf";
         }
     }
 
@@ -283,5 +332,20 @@ public class MainActivity extends AppCompatActivity {
         GradientDrawable gradientDrawable = (GradientDrawable) background;
         gradientDrawable.setColor(color);
         mColorPicker.dismiss();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            if (data != null) {
+                photos = data.getStringArrayListExtra(PhotoPickerActivity.KEY_SELECTED_PHOTOS);
+                Log.e("图片地址：", photos.get(0));
+                mBaseBitmap = BitmapFactory.decodeFile(photos.get(0));
+                mImageView.setImageBitmap(mBaseBitmap);
+            }
+        }
     }
 }

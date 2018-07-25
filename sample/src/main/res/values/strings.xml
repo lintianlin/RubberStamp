@@ -17,6 +17,7 @@
     <string name="shader">Shader</string>
     <string name="text_color">Text Color</string>
     <string name="text_background">Text Background</string>
+    <string name="selectPic">选择图片</string>
 
     <string-array name="position_array">
         <item>Top Left</item>

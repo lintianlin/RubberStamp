@@ -1,19 +1,3 @@
-/*
-  Copyright (C) 2017 Vinay Gaba
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
- */
-
 package com.vinaygaba.rubberstamp;
 
 import android.content.Context;
@@ -223,29 +207,32 @@ public class RubberStamp {
     }
 
     /**
-     * Method to add a bitmap RubberStamp to a canvas based on the provided configuration
-     *
-     * @param rubberStampBitmap The bitmap which will be used as the RubberStamp
-     * @param config            The RubberStampConfig that specifies how the RubberStamp should look
-     * @param canvas            The canvas on top of which the RubberStamp needs to be drawn
-     * @param baseBitmapWidth   The width of the base bitmap
-     * @param baseBitmapHeight  The height of the base bitmap
+     * 添加图片水印到图片上
+     * @param rubberStampBitmap 水印图片
+     * @param config  配置参数
+     * @param canvas  画布
+     * @param baseBitmapWidth  基础图片宽度
+     * @param baseBitmapHeight  基础图片高度
      */
     private void addBitmapToBitmap(@NonNull Bitmap rubberStampBitmap,
                                    @NonNull RubberStampConfig config,
                                    @NonNull Canvas canvas,
                                    int baseBitmapWidth,
                                    int baseBitmapHeight) {
+        //创建画笔
         Paint paint = new Paint();
+        //设置抗锯齿
         paint.setAntiAlias(true);
+        //取消下划线
         paint.setUnderlineText(false);
 
+        //设置透明度
         int alpha = config.getAplha();
-        // Add alpha to the rubberstamp if its within range or it uses the default value.
         if (alpha >= 0 && alpha <= 255) {
             paint.setAlpha(alpha);
         }
 
+        //设置水印的位置
         int positionX = config.getPositionX();
         int positionY = config.getPositionY();
         RubberStampPosition rubberStampPosition = config.getRubberStampPosition();
@@ -260,10 +247,11 @@ public class RubberStamp {
             positionY = pair.second - rubberStampBitmap.getHeight();
         }
 
-        // Add the margin to this position if it was passed to the config.
+        //设置margin值
         positionX += config.getXMargin();
         positionY += config.getYMargin();
 
+        //设置旋转角度
         float rotation = config.getRotation();
         if (rotation != 0.0f) {
             // Add rotation if its present in the config.
@@ -271,6 +259,7 @@ public class RubberStamp {
                     positionY + (rubberStampBitmap.getHeight() / 2));
         }
 
+        //设置是否全屏水印
         if (rubberStampPosition != TILE) {
             canvas.drawBitmap(rubberStampBitmap, positionX, positionY, paint);
         } else {
